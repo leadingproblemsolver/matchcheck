@@ -1,0 +1,38 @@
+{
+  "purchase_orders": [
+    {
+      "doc_id": "PO-1001",
+      "po": "PO-1001",
+      "sku": "CEM-42.5",
+      "description": "Cement 42.5N, 50 kg bag",
+      "uom": "bags",
+      "qty": "100",
+      "unit_price": "50"
+    }
+  ],
+  "receipts": [
+    {
+      "grn": "GRN-5501",
+      "po": "PO-1001",
+      "sku": "CEM-42.5",
+      "qty": "85",
+      "signed": "yes",
+      "date": "2026-10-12"
+    }
+  ],
+  "invoices": [
+    {
+      "doc_id": "INV-DOC-041",
+      "invoice_no": "INV-2026-041",
+      "vendor": "Al Rayyan Building Supply",
+      "date": "2026-10-14",
+      "line": "1",
+      "po": "PO-1001",
+      "sku": "CEM-42.5",
+      "description": "Cement 42.5N, 50 kg bag",
+      "qty": "100",
+      "unit_price": "50",
+      "notes": ""
+    }
+  ]
+}

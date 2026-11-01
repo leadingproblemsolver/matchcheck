@@ -1,0 +1,59 @@
+{
+  "purchase_orders": [
+    {
+      "doc_id": "PO-2002",
+      "po": "PO-2002",
+      "sku": "VLV-DN50",
+      "description": "Gate valve DN50",
+      "uom": "valves",
+      "qty": "100",
+      "unit_price": "120"
+    }
+  ],
+  "receipts": [
+    {
+      "grn": "GRN-6001",
+      "po": "PO-2002",
+      "sku": "VLV-DN50",
+      "qty": "60",
+      "signed": "yes",
+      "date": "2026-10-05"
+    },
+    {
+      "grn": "GRN-6002",
+      "po": "PO-2002",
+      "sku": "VLV-DN50",
+      "qty": "25",
+      "signed": "yes",
+      "date": "2026-10-15"
+    }
+  ],
+  "invoices": [
+    {
+      "doc_id": "INV-DOC-B1",
+      "invoice_no": "VAL-7001",
+      "vendor": "Doha Flow Controls",
+      "date": "2026-10-10",
+      "line": "1",
+      "po": "PO-2002",
+      "sku": "VLV-DN50",
+      "description": "Gate valve DN50",
+      "qty": "50",
+      "unit_price": "120",
+      "notes": ""
+    },
+    {
+      "doc_id": "INV-DOC-B2",
+      "invoice_no": "VAL-7002",
+      "vendor": "Doha Flow Controls",
+      "date": "2026-10-20",
+      "line": "1",
+      "po": "PO-2002",
+      "sku": "VLV-DN50",
+      "description": "Gate valve DN50",
+      "qty": "50",
+      "unit_price": "120",
+      "notes": ""
+    }
+  ]
+}

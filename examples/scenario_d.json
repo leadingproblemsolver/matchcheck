@@ -1,0 +1,51 @@
+{
+  "purchase_orders": [
+    {
+      "doc_id": "PO-4004",
+      "po": "PO-4004",
+      "sku": "CONC-C40",
+      "description": "Ready-mix concrete C40",
+      "uom": "m3",
+      "qty": "20",
+      "unit_price": "310"
+    }
+  ],
+  "receipts": [
+    {
+      "grn": "GRN-7201",
+      "po": "PO-4004",
+      "sku": "CONC-C40",
+      "qty": "20",
+      "signed": "yes",
+      "date": "2026-10-07"
+    }
+  ],
+  "invoices": [
+    {
+      "doc_id": "INV-DOC-089A",
+      "invoice_no": "INV-2026-089",
+      "vendor": "Lusail Readymix",
+      "date": "2026-10-08",
+      "line": "1",
+      "po": "PO-4004",
+      "sku": "CONC-C40",
+      "description": "Ready-mix concrete C40",
+      "qty": "20",
+      "unit_price": "310",
+      "notes": ""
+    },
+    {
+      "doc_id": "INV-DOC-089B",
+      "invoice_no": "INV/2026/0089",
+      "vendor": "Lusail Readymix",
+      "date": "2026-10-22",
+      "line": "1",
+      "po": "PO-4004",
+      "sku": "CONC-C40",
+      "description": "Ready-mix concrete C40",
+      "qty": "20",
+      "unit_price": "310",
+      "notes": "Reminder: unpaid"
+    }
+  ]
+}

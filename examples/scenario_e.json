@@ -1,0 +1,198 @@
+{
+  "purchase_orders": [
+    {
+      "doc_id": "PO-5005",
+      "po": "PO-5005",
+      "sku": "FLT-OIL",
+      "description": "Oil filter",
+      "uom": "units",
+      "qty": "24",
+      "unit_price": "35"
+    },
+    {
+      "doc_id": "PO-5005",
+      "po": "PO-5005",
+      "sku": "FLT-AIR",
+      "description": "Air filter",
+      "uom": "units",
+      "qty": "12",
+      "unit_price": "60"
+    },
+    {
+      "doc_id": "PO-5005",
+      "po": "PO-5005",
+      "sku": "FLT-FUEL",
+      "description": "Fuel filter",
+      "uom": "units",
+      "qty": "10",
+      "unit_price": "80"
+    },
+    {
+      "doc_id": "PO-5005",
+      "po": "PO-5005",
+      "sku": "FLT-CAB",
+      "description": "Cabin filter",
+      "uom": "units",
+      "qty": "7",
+      "unit_price": "25"
+    },
+    {
+      "doc_id": "PO-5005",
+      "po": "PO-5005",
+      "sku": "FLT-HYD",
+      "description": "Hydraulic filter",
+      "uom": "units",
+      "qty": "8",
+      "unit_price": "40"
+    }
+  ],
+  "receipts": [
+    {
+      "grn": "GRN-8001",
+      "po": "PO-5005",
+      "sku": "FLT-OIL",
+      "qty": "24",
+      "signed": "no",
+      "date": "2026-10-11"
+    },
+    {
+      "grn": "GRN-8002",
+      "po": "PO-5005",
+      "sku": "FLT-FUEL",
+      "qty": "10",
+      "signed": "yes",
+      "date": "2026-10-11"
+    },
+    {
+      "grn": "GRN-8003",
+      "po": "PO-5005",
+      "sku": "FLT-CAB",
+      "qty": "1",
+      "signed": "yes",
+      "date": "2026-10-01"
+    },
+    {
+      "grn": "GRN-8004",
+      "po": "PO-5005",
+      "sku": "FLT-CAB",
+      "qty": "1",
+      "signed": "yes",
+      "date": "2026-10-02"
+    },
+    {
+      "grn": "GRN-8005",
+      "po": "PO-5005",
+      "sku": "FLT-CAB",
+      "qty": "1",
+      "signed": "yes",
+      "date": "2026-10-03"
+    },
+    {
+      "grn": "GRN-8006",
+      "po": "PO-5005",
+      "sku": "FLT-CAB",
+      "qty": "1",
+      "signed": "yes",
+      "date": "2026-10-04"
+    },
+    {
+      "grn": "GRN-8007",
+      "po": "PO-5005",
+      "sku": "FLT-CAB",
+      "qty": "1",
+      "signed": "yes",
+      "date": "2026-10-05"
+    },
+    {
+      "grn": "GRN-8008",
+      "po": "PO-5005",
+      "sku": "FLT-CAB",
+      "qty": "1",
+      "signed": "yes",
+      "date": "2026-10-06"
+    },
+    {
+      "grn": "GRN-8009",
+      "po": "PO-5005",
+      "sku": "FLT-CAB",
+      "qty": "1",
+      "signed": "yes",
+      "date": "2026-10-07"
+    },
+    {
+      "grn": "GRN-8010",
+      "po": "PO-5005",
+      "sku": "FLT-HYD",
+      "qty": "8",
+      "signed": "yes",
+      "date": "2026-10-11"
+    }
+  ],
+  "invoices": [
+    {
+      "doc_id": "INV-DOC-E1",
+      "invoice_no": "FM-310",
+      "vendor": "Fleet Parts Qatar",
+      "date": "2026-10-18",
+      "line": "1",
+      "po": "PO-5005",
+      "sku": "FLT-OIL",
+      "description": "Oil filter",
+      "qty": "24",
+      "unit_price": "35",
+      "notes": ""
+    },
+    {
+      "doc_id": "INV-DOC-E1",
+      "invoice_no": "FM-310",
+      "vendor": "Fleet Parts Qatar",
+      "date": "2026-10-18",
+      "line": "2",
+      "po": "PO-5005",
+      "sku": "FLT-AIR",
+      "description": "Air filter",
+      "qty": "",
+      "unit_price": "60",
+      "notes": ""
+    },
+    {
+      "doc_id": "INV-DOC-E1",
+      "invoice_no": "FM-310",
+      "vendor": "Fleet Parts Qatar",
+      "date": "2026-10-18",
+      "line": "3",
+      "po": "PO-5005",
+      "sku": "FLT-FUEL",
+      "description": "Fuel filter",
+      "qty": "10",
+      "unit_price": "eighty",
+      "notes": ""
+    },
+    {
+      "doc_id": "INV-DOC-E1",
+      "invoice_no": "FM-310",
+      "vendor": "Fleet Parts Qatar",
+      "date": "2026-10-18",
+      "line": "4",
+      "po": "PO-5005",
+      "sku": "FLT-CAB",
+      "description": "Cabin filter",
+      "qty": "7",
+      "unit_price": "25",
+      "notes": ""
+    },
+    {
+      "doc_id": "INV-DOC-E1",
+      "invoice_no": "FM-310",
+      "vendor": "Fleet Parts Qatar",
+      "date": "2026-10-18",
+      "line": "5",
+      "po": "PO-5005",
+      "sku": "FLT-HYD",
+      "description": "Hydraulic filter",
+      "qty": "8",
+      "unit_price": "40",
+      "notes": ""
+    }
+  ]
+}

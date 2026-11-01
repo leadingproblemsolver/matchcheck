@@ -1,0 +1,612 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MatchCheck</title>
+<style>
+:root{
+  --bg:#f6f7f9; --card:#fff; --ink:#15202b; --muted:#5b6876; --line:#dde2e8;
+  --accent:#0b5fff; --accent-ink:#fff;
+  --hold:#b42318; --hold-bg:#fdecea; --nh:#8a5300; --nh-bg:#fff3d6; --ok:#146c43; --ok-bg:#e4f5ec;
+  --flash:#fff0a8;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0f141a; --card:#171e26; --ink:#e8edf2; --muted:#9aa7b4; --line:#2b3641;
+    --accent:#5b8dff; --accent-ink:#0b1220;
+    --hold:#ff8a80; --hold-bg:#3a1b1a; --nh:#ffcc66; --nh-bg:#38290c; --ok:#6fd3a0; --ok-bg:#12301f;
+    --flash:#4a4310;
+  }
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:1360px;margin:0 auto;padding:16px}
+header{display:flex;flex-wrap:wrap;gap:8px 16px;align-items:center;justify-content:space-between;margin-bottom:12px}
+h1{font-size:22px;margin:0}
+.sub{color:var(--muted);font-size:13px}
+.badge{display:inline-block;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;background:var(--nh-bg);color:var(--nh);border:1px solid var(--line)}
+.badge.mine{background:var(--ok-bg);color:var(--ok)}
+.scen{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px}
+.scen button{all:unset;cursor:pointer;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px 12px;box-sizing:border-box}
+.scen button b{display:block;font-size:13px}
+.scen button span{font-size:12px;color:var(--muted)}
+.scen button[aria-pressed="true"]{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent) inset}
+.scen button:focus-visible,.btn:focus-visible,a.ref:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.docs{display:grid;grid-template-columns:1fr 1fr 1.3fr;gap:12px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px;min-width:0}
+.card h2{font-size:14px;margin:0 0 2px}
+.card .hint{font-size:12px;color:var(--muted);margin-bottom:8px}
+.scroll{overflow:auto;max-height:290px}
+table{border-collapse:collapse;width:100%;font-size:13px}
+th,td{padding:5px 8px;border-bottom:1px solid var(--line);text-align:left;white-space:nowrap}
+th{position:sticky;top:0;background:var(--card);font-size:12px;color:var(--muted)}
+td.n,th.n{text-align:right;font-variant-numeric:tabular-nums}
+td.qty,td.price,td.sku{cursor:default}
+td.qty:hover,td.price:hover{background:var(--flash);outline:2px solid var(--accent);outline-offset:-2px}
+tr.flash td{background:var(--flash)}
+td.m-ok{background:var(--ok-bg);color:var(--ok);font-weight:600}
+td.m-diff{background:var(--nh-bg);color:var(--nh);font-weight:600}
+td.notes{max-width:200px;overflow:hidden;text-overflow:ellipsis;color:var(--muted)}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0}
+.btn{cursor:pointer;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:8px;padding:9px 14px;font:inherit;font-weight:600}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn[disabled]{opacity:.45;cursor:not-allowed}
+.btn[aria-pressed="true"]{border-color:var(--ok);color:var(--ok)}
+.spacer{flex:1}
+#gridmsg{color:var(--muted);padding:10px 12px;border:1px dashed var(--line);border-radius:10px;margin-bottom:12px}
+#result[hidden]{display:none}
+#headline{font-size:20px;font-weight:700;margin:0 0 4px}
+.note{font-size:12px;color:var(--muted)}
+.chip{display:inline-block;padding:2px 8px;border-radius:6px;font-size:12px;font-weight:700}
+.chip.HOLD{background:var(--hold-bg);color:var(--hold)}
+.chip.NEEDS_HUMAN{background:var(--nh-bg);color:var(--nh)}
+.chip.CLEAR_FOR_REVIEW{background:var(--ok-bg);color:var(--ok)}
+.counts{display:flex;gap:8px;flex-wrap:wrap;margin:8px 0 10px}
+a.ref{color:var(--accent);cursor:pointer;text-decoration:underline;margin-right:6px}
+#nextstep{margin-top:12px;padding:10px 12px;border-left:4px solid var(--accent);background:var(--bg);border-radius:6px}
+#nextstep b{display:block}
+#telemetry{margin-top:12px;font-size:12px;color:var(--muted);border-top:1px solid var(--line);padding-top:10px}
+#telemetry code{background:var(--card);border:1px solid var(--line);border-radius:4px;padding:1px 5px;color:var(--ink)}
+dialog{border:1px solid var(--line);border-radius:12px;background:var(--card);color:var(--ink);max-width:720px;width:calc(100% - 32px)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+textarea{width:100%;min-height:200px;font:12px/1.4 ui-monospace,Menlo,Consolas,monospace;background:var(--bg);color:var(--ink);border:1px solid var(--line);border-radius:8px;padding:8px}
+label{display:block;font-size:13px;margin:8px 0 2px}
+.err{color:var(--hold);font-size:13px;min-height:1.2em}
+@media (max-width:980px){.docs{grid-template-columns:1fr}.scen{grid-template-columns:1fr 1fr}}
+@media (max-width:520px){.scen{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div>
+      <h1>MatchCheck <span class="sub">three-way match for goods: order, signed receipt, invoice</span></h1>
+      <div class="sub">Flags differences for a person to review before payment. It does not approve, release or change anything.</div>
+    </div>
+    <div><span id="datalabel" class="badge">Synthetic data sample</span>
+      <button class="btn" id="btnData" type="button">Use your data</button></div>
+  </header>
+
+  <div class="scen" id="scenarios" role="group" aria-label="Scenarios"></div>
+
+  <div class="docs">
+    <section class="card"><h2>Purchase order</h2><div class="hint">What was ordered</div><div class="scroll" id="poPanel"></div></section>
+    <section class="card"><h2>Signed receipt (GRN)</h2><div class="hint">What the site signed for. Unsigned receipts do not count.</div><div class="scroll" id="grnPanel"></div></section>
+    <section class="card"><h2>Invoice</h2><div class="hint">What accounts was billed. Notes are shown but never used by the check.</div><div class="scroll" id="invPanel"></div></section>
+  </div>
+
+  <div class="bar">
+    <button class="btn" id="btnHi" type="button" aria-pressed="false">Highlight matched fields</button>
+    <button class="btn primary" id="btnRun" type="button">Run check</button>
+    <button class="btn" id="btnCsv" type="button" disabled>Export exceptions CSV</button>
+    <span class="spacer"></span>
+    <button class="btn" id="btnStress" type="button">Stress test (1,000 lines)</button>
+  </div>
+  <div id="gridmsg" aria-live="polite">Nothing is evaluated until Run check.</div>
+
+  <section class="card" id="result" hidden aria-live="polite">
+    <p id="headline"></p>
+    <div class="note">Indicative review value is a figure to review. It is not a confirmed loss and not recoverable cash.</div>
+    <div class="counts" id="counts"></div>
+    <div class="scroll" style="max-height:340px" id="exPanel"></div>
+    <div id="nextstep"><b>Human next step</b><span id="nextstepText"></span></div>
+  </section>
+
+  <div id="telemetry"><b>Engine</b>: <span id="telText">hash join on (PO, SKU) with a cumulative receipt ledger. Not run yet.</span></div>
+</div>
+
+<dialog id="dlg">
+  <form method="dialog">
+    <h2 style="margin-top:0">Use your data</h2>
+    <p class="note">Redacted data only. Everything stays in this browser tab; nothing is uploaded. Paste JSON or choose three CSV files.</p>
+    <label for="jsonIn">JSON (<code>purchase_orders</code>, <code>receipts</code>, <code>invoices</code>)</label>
+    <textarea id="jsonIn" spellcheck="false"></textarea>
+    <label for="fPo">Or CSV files. PO columns: doc_id, po, sku, description, uom, qty, unit_price</label>
+    <input type="file" id="fPo" accept=".csv">
+    <label for="fGrn">Receipt columns: grn, po, sku, qty, signed, date</label>
+    <input type="file" id="fGrn" accept=".csv">
+    <label for="fInv">Invoice columns: doc_id, invoice_no, vendor, date, line, po, sku, qty, unit_price, notes</label>
+    <input type="file" id="fInv" accept=".csv">
+    <div class="err" id="loadErr" role="alert"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+      <button class="btn" value="cancel">Cancel</button>
+      <button class="btn primary" id="btnLoad" type="button">Load</button>
+    </div>
+  </form>
+</dialog>
+
+<script type="application/json" id="scenarioData">
+[
+{"id":"A","title":"A. Billed beyond signed receipt","blurb":"Cement: 100 ordered, 85 signed, 100 billed",
+ "data":{
+  "purchase_orders":[{"doc_id":"PO-1001","po":"PO-1001","sku":"CEM-42.5","description":"Cement 42.5N, 50 kg bag","uom":"bags","qty":"100","unit_price":"50"}],
+  "receipts":[{"grn":"GRN-5501","po":"PO-1001","sku":"CEM-42.5","qty":"85","signed":"yes","date":"2026-10-12"}],
+  "invoices":[{"doc_id":"INV-DOC-041","invoice_no":"INV-2026-041","vendor":"Al Rayyan Building Supply","date":"2026-10-14","line":"1","po":"PO-1001","sku":"CEM-42.5","description":"Cement 42.5N, 50 kg bag","qty":"100","unit_price":"50","notes":""}]}},
+{"id":"B","title":"B. Split invoices share one receipt","blurb":"Valves: 85 signed in two receipts, two invoices of 50",
+ "data":{
+  "purchase_orders":[{"doc_id":"PO-2002","po":"PO-2002","sku":"VLV-DN50","description":"Gate valve DN50","uom":"valves","qty":"100","unit_price":"120"}],
+  "receipts":[
+   {"grn":"GRN-6001","po":"PO-2002","sku":"VLV-DN50","qty":"60","signed":"yes","date":"2026-10-05"},
+   {"grn":"GRN-6002","po":"PO-2002","sku":"VLV-DN50","qty":"25","signed":"yes","date":"2026-10-15"}],
+  "invoices":[
+   {"doc_id":"INV-DOC-B1","invoice_no":"VAL-7001","vendor":"Doha Flow Controls","date":"2026-10-10","line":"1","po":"PO-2002","sku":"VLV-DN50","description":"Gate valve DN50","qty":"50","unit_price":"120","notes":""},
+   {"doc_id":"INV-DOC-B2","invoice_no":"VAL-7002","vendor":"Doha Flow Controls","date":"2026-10-20","line":"1","po":"PO-2002","sku":"VLV-DN50","description":"Gate valve DN50","qty":"50","unit_price":"120","notes":""}]}},
+{"id":"C","title":"C. Five-line invoice","blurb":"Price rise, item not on order, no receipt, note says pay in full",
+ "data":{
+  "purchase_orders":[
+   {"doc_id":"PO-3003","po":"PO-3003","sku":"BOLT-M12","description":"Bolt M12","uom":"pcs","qty":"500","unit_price":"2.00"},
+   {"doc_id":"PO-3003","po":"PO-3003","sku":"PIPE-25","description":"PVC pipe 25 mm","uom":"pcs","qty":"200","unit_price":"18.00"},
+   {"doc_id":"PO-3003","po":"PO-3003","sku":"CLAMP-8","description":"Pipe clamp","uom":"pcs","qty":"300","unit_price":"1.50"},
+   {"doc_id":"PO-3003","po":"PO-3003","sku":"PAINT-5L","description":"Paint 5 L","uom":"tins","qty":"40","unit_price":"95"},
+   {"doc_id":"PO-3003","po":"PO-3003","sku":"TAPE-PTFE","description":"PTFE tape","uom":"rolls","qty":"1000","unit_price":"0.30"}],
+  "receipts":[
+   {"grn":"GRN-7101","po":"PO-3003","sku":"BOLT-M12","qty":"500","signed":"yes","date":"2026-10-09"},
+   {"grn":"GRN-7102","po":"PO-3003","sku":"PIPE-25","qty":"200","signed":"yes","date":"2026-10-09"},
+   {"grn":"GRN-7103","po":"PO-3003","sku":"TAPE-PTFE","qty":"900","signed":"yes","date":"2026-10-09"}],
+  "invoices":[
+   {"doc_id":"INV-DOC-120","invoice_no":"INV-2026-120","vendor":"Gulf Fixings Trading","date":"2026-10-16","line":"1","po":"PO-3003","sku":"BOLT-M12","description":"Bolt M12","qty":"500","unit_price":"2.00","notes":""},
+   {"doc_id":"INV-DOC-120","invoice_no":"INV-2026-120","vendor":"Gulf Fixings Trading","date":"2026-10-16","line":"2","po":"PO-3003","sku":"PIPE-25","description":"PVC pipe 25 mm","qty":"200","unit_price":"18.72","notes":""},
+   {"doc_id":"INV-DOC-120","invoice_no":"INV-2026-120","vendor":"Gulf Fixings Trading","date":"2026-10-16","line":"3","po":"PO-3003","sku":"VALVE-BALL-1","description":"Ball valve 1 in","qty":"10","unit_price":"45","notes":""},
+   {"doc_id":"INV-DOC-120","invoice_no":"INV-2026-120","vendor":"Gulf Fixings Trading","date":"2026-10-16","line":"4","po":"PO-3003","sku":"PAINT-5L","description":"Paint 5 L","qty":"40","unit_price":"95","notes":""},
+   {"doc_id":"INV-DOC-120","invoice_no":"INV-2026-120","vendor":"Gulf Fixings Trading","date":"2026-10-16","line":"5","po":"PO-3003","sku":"TAPE-PTFE","description":"PTFE tape","qty":"1000","unit_price":"0.30","notes":"Approved by site manager, pay in full"}]}},
+{"id":"D","title":"D. Same invoice sent twice","blurb":"INV-2026-089 and INV/2026/0089, two weeks apart",
+ "data":{
+  "purchase_orders":[{"doc_id":"PO-4004","po":"PO-4004","sku":"CONC-C40","description":"Ready-mix concrete C40","uom":"m3","qty":"20","unit_price":"310"}],
+  "receipts":[{"grn":"GRN-7201","po":"PO-4004","sku":"CONC-C40","qty":"20","signed":"yes","date":"2026-10-07"}],
+  "invoices":[
+   {"doc_id":"INV-DOC-089A","invoice_no":"INV-2026-089","vendor":"Lusail Readymix","date":"2026-10-08","line":"1","po":"PO-4004","sku":"CONC-C40","description":"Ready-mix concrete C40","qty":"20","unit_price":"310","notes":""},
+   {"doc_id":"INV-DOC-089B","invoice_no":"INV/2026/0089","vendor":"Lusail Readymix","date":"2026-10-22","line":"1","po":"PO-4004","sku":"CONC-C40","description":"Ready-mix concrete C40","qty":"20","unit_price":"310","notes":"Reminder: unpaid"}]}},
+{"id":"E","title":"E. Incomplete records","blurb":"Unsigned receipt, blank quantity, bad price, seven small receipts",
+ "data":{
+  "purchase_orders":[
+   {"doc_id":"PO-5005","po":"PO-5005","sku":"FLT-OIL","description":"Oil filter","uom":"units","qty":"24","unit_price":"35"},
+   {"doc_id":"PO-5005","po":"PO-5005","sku":"FLT-AIR","description":"Air filter","uom":"units","qty":"12","unit_price":"60"},
+   {"doc_id":"PO-5005","po":"PO-5005","sku":"FLT-FUEL","description":"Fuel filter","uom":"units","qty":"10","unit_price":"80"},
+   {"doc_id":"PO-5005","po":"PO-5005","sku":"FLT-CAB","description":"Cabin filter","uom":"units","qty":"7","unit_price":"25"},
+   {"doc_id":"PO-5005","po":"PO-5005","sku":"FLT-HYD","description":"Hydraulic filter","uom":"units","qty":"8","unit_price":"40"}],
+  "receipts":[
+   {"grn":"GRN-8001","po":"PO-5005","sku":"FLT-OIL","qty":"24","signed":"no","date":"2026-10-11"},
+   {"grn":"GRN-8002","po":"PO-5005","sku":"FLT-FUEL","qty":"10","signed":"yes","date":"2026-10-11"},
+   {"grn":"GRN-8003","po":"PO-5005","sku":"FLT-CAB","qty":"1","signed":"yes","date":"2026-10-01"},
+   {"grn":"GRN-8004","po":"PO-5005","sku":"FLT-CAB","qty":"1","signed":"yes","date":"2026-10-02"},
+   {"grn":"GRN-8005","po":"PO-5005","sku":"FLT-CAB","qty":"1","signed":"yes","date":"2026-10-03"},
+   {"grn":"GRN-8006","po":"PO-5005","sku":"FLT-CAB","qty":"1","signed":"yes","date":"2026-10-04"},
+   {"grn":"GRN-8007","po":"PO-5005","sku":"FLT-CAB","qty":"1","signed":"yes","date":"2026-10-05"},
+   {"grn":"GRN-8008","po":"PO-5005","sku":"FLT-CAB","qty":"1","signed":"yes","date":"2026-10-06"},
+   {"grn":"GRN-8009","po":"PO-5005","sku":"FLT-CAB","qty":"1","signed":"yes","date":"2026-10-07"},
+   {"grn":"GRN-8010","po":"PO-5005","sku":"FLT-HYD","qty":"8","signed":"yes","date":"2026-10-11"}],
+  "invoices":[
+   {"doc_id":"INV-DOC-E1","invoice_no":"FM-310","vendor":"Fleet Parts Qatar","date":"2026-10-18","line":"1","po":"PO-5005","sku":"FLT-OIL","description":"Oil filter","qty":"24","unit_price":"35","notes":""},
+   {"doc_id":"INV-DOC-E1","invoice_no":"FM-310","vendor":"Fleet Parts Qatar","date":"2026-10-18","line":"2","po":"PO-5005","sku":"FLT-AIR","description":"Air filter","qty":"","unit_price":"60","notes":""},
+   {"doc_id":"INV-DOC-E1","invoice_no":"FM-310","vendor":"Fleet Parts Qatar","date":"2026-10-18","line":"3","po":"PO-5005","sku":"FLT-FUEL","description":"Fuel filter","qty":"10","unit_price":"eighty","notes":""},
+   {"doc_id":"INV-DOC-E1","invoice_no":"FM-310","vendor":"Fleet Parts Qatar","date":"2026-10-18","line":"4","po":"PO-5005","sku":"FLT-CAB","description":"Cabin filter","qty":"7","unit_price":"25","notes":""},
+   {"doc_id":"INV-DOC-E1","invoice_no":"FM-310","vendor":"Fleet Parts Qatar","date":"2026-10-18","line":"5","po":"PO-5005","sku":"FLT-HYD","description":"Hydraulic filter","qty":"8","unit_price":"40","notes":""}]}}
+]
+</script>
+
+<script id="engine">
+/* ENGINE START - deterministic three-way match. Mirrors matchcheck.py; tests/test_parity.py proves identical output. */
+const MatchCheckEngine = (() => {
+  const CLEAR = "CLEAR_FOR_REVIEW", NEEDS_HUMAN = "NEEDS_HUMAN", HOLD = "HOLD";
+  const STATUSES = [CLEAR, NEEDS_HUMAN, HOLD];
+  const RANK = {CLEAR_FOR_REVIEW: 0, NEEDS_HUMAN: 1, HOLD: 2};
+  const PRICE_TOL_BPS = 100n, K_CAP = 6, S = 1000000n, CURRENCY = "QAR";
+  const NUM_RE = /^-?[0-9]+(\.[0-9]+)?$/;
+  const CSV_COLUMNS = ["invoice_doc","invoice_no","line","po","sku","uom","billed_qty","po_qty",
+    "signed_qty_total","qty_beyond_review","status","reason_codes","indicative_review_value_qar",
+    "po_ref","grn_refs","human_next_step"];
+  const NEXT_STEP = {
+    CLEAR_FOR_REVIEW: "No exception found by this check. A person still approves payment.",
+    NEEDS_HUMAN: "Complete or confirm the record, then run the check again.",
+    HOLD: "Check for another signed receipt or ask the supplier before any payment decision."};
+  const txt = v => (v === null || v === undefined) ? "" : String(v).trim();
+  const bmin = (a, b) => a < b ? a : b, bmax = (a, b) => a > b ? a : b, babs = a => a < 0n ? -a : a;
+  function parseNum(v) {
+    if (v === null || v === undefined) return {s: "blank"};
+    if (typeof v === "boolean") return {s: "bad"};
+    const t = String(v).trim();
+    if (t === "") return {s: "blank"};
+    if (!NUM_RE.test(t)) return {s: "bad"};
+    const neg = t[0] === "-", u = neg ? t.slice(1) : t, parts = u.split(".");
+    const frac = parts[1] || "";
+    if (frac.length > 6) return {s: "bad"};
+    const val = BigInt(parts[0]) * S + BigInt((frac + "000000").slice(0, 6));
+    return {s: "ok", v: neg ? -val : val};
+  }
+  function fmtScaled(v, scale, digits, strip) {
+    const neg = v < 0n, a = babs(v), i = a / scale;
+    let f = (a % scale).toString().padStart(digits, "0");
+    if (strip) f = f.replace(/0+$/, "");
+    return (neg ? "-" : "") + i.toString() + (f ? "." + f : "");
+  }
+  const fmtQty = v => v === 0n ? "0" : fmtScaled(v, S, 6, true);
+  function fmtMoney(v) { // v scaled 1e12, non-negative, round half up to 2 dp
+    const cents = (v + 5000000000n) / 10000000000n;
+    return fmtScaled(cents, 100n, 2, false);
+  }
+  const signedWord = v => ["true","yes","y","1","signed"].includes(txt(v).toLowerCase());
+  const skuKey = v => txt(v).toUpperCase();
+  const lineSortKey = l => /^[0-9]+$/.test(l) ? "0" + l.padStart(12, "0") : "1" + l;
+  function invoiceKey(vendor, no) {
+    const v = txt(vendor).toLowerCase().replace(/[^a-z0-9]/g, ""), n = txt(no);
+    const toks = n.match(/[A-Za-z]+|[0-9]+/g) || [];
+    if (!toks.length) return v + "|" + n.toLowerCase();
+    return v + "|" + toks.map(t => /^[0-9]+$/.test(t) ? (t.replace(/^0+/, "") || "0") : t.toLowerCase()).join(".");
+  }
+  function cmp(a, b) {
+    for (let i = 0; i < 5; i++) { if (a[i] < b[i]) return -1; if (a[i] > b[i]) return 1; }
+    return 0;
+  }
+  const kk = (po, sku) => po + "\u0000" + sku;
+
+  function evaluate(data) {
+    const t0 = (typeof performance !== "undefined" ? performance : Date).now();
+    let ops = 0;
+    const pos = data.purchase_orders || [], grns = data.receipts || [], invs = data.invoices || [];
+    const poIndex = new Map(), poDupe = new Set();
+    for (const r of pos) {
+      ops++;
+      const k = kk(txt(r.po), skuKey(r.sku));
+      if (poIndex.has(k)) { poDupe.add(k); continue; }
+      const q = parseNum(r.qty), p = parseNum(r.unit_price);
+      poIndex.set(k, {qty: q.v, price: p.v, ok: q.s === "ok" && p.s === "ok", uom: txt(r.uom), ref: txt(r.doc_id) || txt(r.po)});
+    }
+    const signed = new Map(), signedN = new Map(), grnRefs = new Map(), badRcpt = new Set();
+    for (const r of grns) {
+      ops++;
+      const k = kk(txt(r.po), skuKey(r.sku));
+      if (!signedWord(r.signed)) continue;
+      const q = parseNum(r.qty);
+      if (q.s !== "ok" || q.v < 0n) { badRcpt.add(k); continue; }
+      signed.set(k, (signed.get(k) || 0n) + q.v);
+      signedN.set(k, (signedN.get(k) || 0) + 1);
+      if (!grnRefs.has(k)) grnRefs.set(k, []);
+      grnRefs.get(k).push(txt(r.grn) || txt(r.doc_id));
+    }
+    const order = invs.map((r, i) => [txt(r.date), txt(r.doc_id) || txt(r.invoice_no), lineSortKey(txt(r.line)), skuKey(r.sku), i, r]);
+    order.sort(cmp);
+
+    const ledger = new Map(), docState = new Map(), keyOwner = new Map(), lines = [];
+    let maxOpen = 0;
+    for (const [, doc, , , , r] of order) {
+      ops++;
+      const invoiceNo = txt(r.invoice_no);
+      if (!docState.has(doc)) {
+        let dup = false;
+        if (invoiceNo) {
+          const key = invoiceKey(r.vendor, invoiceNo);
+          if (!keyOwner.has(key)) keyOwner.set(key, doc);
+          dup = keyOwner.get(key) !== doc;
+        }
+        docState.set(doc, dup);
+      }
+      const isDup = docState.get(doc);
+      const po = txt(r.po), sku = skuKey(r.sku), line = txt(r.line), k = kk(po, sku);
+      const qn = parseNum(r.qty), pn = parseNum(r.unit_price);
+      const codes = []; let status = CLEAR, value = 0n, beyond = 0n;
+      const poRow = poIndex.get(k) || null;
+      const signedTotal = signed.get(k) || 0n;
+      const refs = (grnRefs.get(k) || []).slice().sort();
+      maxOpen = Math.max(maxOpen, signedN.get(k) || 0);
+      const flag = (code, st) => { codes.push(code); if (RANK[st] > RANK[status]) status = st; };
+
+      const missing = [["doc_id", !doc], ["invoice_no", !invoiceNo], ["po", !po], ["sku", !sku],
+        ["qty", qn.s !== "ok"], ["unit_price", pn.s !== "ok"]].filter(x => x[1]).map(x => x[0]);
+      if (missing.length) flag("MISSING_OR_UNPARSEABLE_FIELD:" + missing.join("+"), NEEDS_HUMAN);
+      if (po && sku && qn.s === "ok") {
+        const qty = qn.v;
+        if (isDup) {
+          flag("DUPLICATE_OPERATION_KEY", HOLD);
+          value = qty * (pn.s === "ok" ? pn.v : (poRow && poRow.ok ? poRow.price : 0n));
+        } else if (qty < 0n) {
+          flag("CREDIT_OR_NEGATIVE_QTY", NEEDS_HUMAN);
+        } else if (!poRow) {
+          flag("SKU_NOT_ON_PO", HOLD);
+          value = qty * (pn.s === "ok" ? pn.v : 0n);
+        } else if (!poRow.ok || poDupe.has(k)) {
+          flag("AMBIGUOUS_OR_UNPARSEABLE_PO_LINE", NEEDS_HUMAN);
+        } else {
+          const before = ledger.get(k) || 0n, after = before + qty;
+          ledger.set(k, after);
+          let overSigned = bmin(qty, bmax(0n, after - bmax(signedTotal, before)));
+          const overPo = bmin(qty, bmax(0n, after - bmax(poRow.qty, before)));
+          if (signedTotal === 0n) { overSigned = qty; flag("NO_SIGNED_RECEIPT_ON_FILE", NEEDS_HUMAN); }
+          else if (overSigned > 0n) flag("QTY_BEYOND_SIGNED_RECEIPT", HOLD);
+          if (overPo > 0n) flag("QTY_BEYOND_PO", HOLD);
+          if (badRcpt.has(k)) flag("UNPARSEABLE_RECEIPT_ROW", NEEDS_HUMAN);
+          beyond = bmax(overSigned, overPo);
+          value = beyond * poRow.price;
+          if (pn.s === "ok") {
+            const diff = pn.v - poRow.price;
+            if (babs(diff) * 10000n > PRICE_TOL_BPS * poRow.price) {
+              if (diff > 0n) { flag("PRICE_ABOVE_PO_TOLERANCE", HOLD); value += diff * (qty - beyond); }
+              else flag("PRICE_BELOW_PO_TOLERANCE", NEEDS_HUMAN);
+            }
+          }
+          if (status === CLEAR && (signedN.get(k) || 0) > K_CAP) flag("PARTIAL_DELIVERY_COMPLEXITY_CAP", NEEDS_HUMAN);
+        }
+      }
+      lines.push({
+        invoice_doc: doc, invoice_no: invoiceNo, line, po, sku, uom: poRow ? poRow.uom : "",
+        billed_qty: qn.s === "ok" ? fmtQty(qn.v) : "",
+        po_qty: poRow && poRow.qty !== undefined ? fmtQty(poRow.qty) : "",
+        signed_qty_total: fmtQty(signedTotal), qty_beyond_review: fmtQty(beyond),
+        status, reason_codes: codes.length ? codes.join(";") : "MATCHED",
+        indicative_review_value_qar: fmtMoney(value),
+        po_ref: poRow ? poRow.ref : "", grn_refs: refs.join(";"),
+        human_next_step: NEXT_STEP[status], _value: value});
+    }
+    const docs = new Map();
+    for (const ln of lines) {
+      if (!docs.has(ln.invoice_doc)) docs.set(ln.invoice_doc, {invoice_doc: ln.invoice_doc, invoice_no: ln.invoice_no, status: CLEAR, value: 0n, lines: 0});
+      const d = docs.get(ln.invoice_doc);
+      d.lines++; d.value += ln._value;
+      if (RANK[ln.status] > RANK[d.status]) d.status = ln.status;
+    }
+    let total = 0n;
+    for (const ln of lines) if (ln.status !== CLEAR) total += ln._value;
+    const counts = {}; for (const s of STATUSES) counts[s] = lines.filter(l => l.status === s).length;
+    const now = (typeof performance !== "undefined" ? performance : Date).now();
+    return {
+      lines, invoices: [...docs.values()].map(d => ({...d, value: fmtMoney(d.value)})),
+      summary: {counts, indicative_review_value_qar: fmtMoney(total), currency: CURRENCY},
+      telemetry: {po_rows: pos.length, receipt_rows: grns.length, invoice_rows: invs.length, hash_ops: ops,
+        naive_comparisons: invs.length * (pos.length + grns.length), max_open_receipts_per_line: maxOpen,
+        k_cap: K_CAP, elapsed_ms: Math.round((now - t0) * 1000) / 1000}};
+  }
+  function csvField(v) { const s = String(v); return /[",\n\r]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
+  function exceptionsCsv(result, includeClear) {
+    const rows = [CSV_COLUMNS.join(",")];
+    for (const ln of result.lines) if (includeClear || ln.status !== CLEAR) rows.push(CSV_COLUMNS.map(c => csvField(ln[c])).join(","));
+    return rows.join("\n") + "\n";
+  }
+  function parseCsv(text) {
+    text = text.replace(/^﻿/, "");
+    const rows = []; let row = [], f = "", q = false;
+    for (let i = 0; i < text.length; i++) {
+      const c = text[i];
+      if (q) { if (c === '"') { if (text[i + 1] === '"') { f += '"'; i++; } else q = false; } else f += c; }
+      else if (c === '"') q = true;
+      else if (c === ",") { row.push(f); f = ""; }
+      else if (c === "\n" || c === "\r") { if (c === "\r" && text[i + 1] === "\n") i++; row.push(f); f = ""; rows.push(row); row = []; }
+      else f += c;
+    }
+    if (f !== "" || row.length) { row.push(f); rows.push(row); }
+    const live = rows.filter(r => r.some(x => x.trim() !== ""));
+    if (!live.length) return [];
+    const head = live[0].map(h => h.trim());
+    return live.slice(1).map(r => Object.fromEntries(head.map((h, i) => [h, r[i] === undefined ? "" : r[i]])));
+  }
+  function synth(n, seed) { // deterministic; identical to matchcheck.synth
+    let st = (seed === undefined ? 1 : seed) >>> 0;
+    const rnd = m => { st = (Math.imul(st, 1664525) + 1013904223) >>> 0; return (st >>> 8) % m; };
+    const pos = [], grns = [], invs = [];
+    for (let i = 0; i < n; i++) {
+      const po = "PO-" + Math.floor(i / 5), sku = "SKU-" + i;
+      pos.push({doc_id: "POD-" + i, po, sku, uom: "unit", qty: "100", unit_price: "50"});
+      const roll = rnd(100), sq = roll < 1 ? "0" : roll < 6 ? "85" : "100";
+      if (sq !== "0") grns.push({grn: "GRN-" + i, po, sku, qty: sq, signed: "yes"});
+      const price = (roll >= 6 && roll < 9) ? "52" : "50";
+      const billed = (roll >= 9 && roll < 11) ? "OTHER-" + i : sku;
+      invs.push({doc_id: "INVD-" + i, invoice_no: "INV-" + i, vendor: "Synthetic Supply",
+        date: "2026-10-" + String(1 + i % 28).padStart(2, "0"), line: "1", po, sku: billed, qty: "100", unit_price: price});
+    }
+    return {purchase_orders: pos, receipts: grns, invoices: invs};
+  }
+  return {evaluate, exceptionsCsv, parseCsv, synth, CLEAR, NEEDS_HUMAN, HOLD, STATUSES, K_CAP};
+})();
+/* ENGINE END */
+</script>
+
+<script id="ui">
+(() => {
+  const E = MatchCheckEngine;
+  const $ = id => document.getElementById(id);
+  const SCEN = JSON.parse($("scenarioData").textContent);
+  const MAX_ROWS = 300;
+  const REASON = {
+    QTY_BEYOND_SIGNED_RECEIPT: "Billed beyond cumulative signed receipt",
+    QTY_BEYOND_PO: "Billed beyond ordered quantity",
+    PRICE_ABOVE_PO_TOLERANCE: "Unit price above order price (over 1%)",
+    PRICE_BELOW_PO_TOLERANCE: "Unit price below order price (over 1%)",
+    SKU_NOT_ON_PO: "Item is not on the purchase order",
+    NO_SIGNED_RECEIPT_ON_FILE: "No signed receipt on file for this item",
+    DUPLICATE_OPERATION_KEY: "Same supplier and invoice number as an earlier invoice",
+    CREDIT_OR_NEGATIVE_QTY: "Negative quantity: credit note needs a person",
+    AMBIGUOUS_OR_UNPARSEABLE_PO_LINE: "Order line is ambiguous or unreadable",
+    UNPARSEABLE_RECEIPT_ROW: "A receipt row for this item is unreadable",
+    PARTIAL_DELIVERY_COMPLEXITY_CAP: "More than 6 signed receipts for this item: person attributes them",
+    MATCHED: "Within signed receipt, order and price tolerance"
+  };
+  const FIELD = {doc_id: "document id", invoice_no: "invoice number", po: "PO", sku: "item", qty: "quantity", unit_price: "unit price"};
+  function reasonText(code) {
+    return code.split(";").map(c => {
+      if (c.startsWith("MISSING_OR_UNPARSEABLE_FIELD:"))
+        return "Blank or unreadable: " + c.split(":")[1].split("+").map(f => FIELD[f] || f).join(", ");
+      return REASON[c] || c;
+    }).join("; ");
+  }
+  function h(tag, attrs, ...kids) {
+    const el = document.createElement(tag);
+    for (const [k, v] of Object.entries(attrs || {})) {
+      if (k === "class") el.className = v; else if (k.startsWith("on")) el.addEventListener(k.slice(2), v);
+      else if (v !== false && v !== null && v !== undefined) el.setAttribute(k, v === true ? "" : v);
+    }
+    for (const kid of kids.flat()) if (kid !== null && kid !== undefined) el.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+    return el;
+  }
+  const money = s => { const [i, f] = s.split("."); const g = i.replace(/\B(?=(\d{3})+(?!\d))/g, ","); return f === "00" ? g : g + "." + f; };
+
+  let data = null, scenId = null, result = null, highlight = false, label = "sample";
+
+  function table(cols, rows, note) {
+    const shown = rows.slice(0, MAX_ROWS);
+    const t = h("table", {}, h("thead", {}, h("tr", {}, cols.map(c => h("th", {class: c.n ? "n" : ""}, c.t)))),
+      h("tbody", {}, shown.map(r => h("tr", r.attrs, cols.map(c => h("td", {class: (c.n ? "n " : "") + (c.cls || "") + " " + (c.cell ? c.cell(r.row) : ""), "data-f": c.f}, c.get(r.row)))))));
+    const box = h("div", {}, t);
+    if (rows.length > MAX_ROWS) box.append(h("div", {class: "note"}, "Showing first " + MAX_ROWS + " of " + rows.length + " rows. The check uses all rows."));
+    return box;
+  }
+  const poKey = (po, sku) => String(po).trim() + "|" + String(sku).trim().toUpperCase();
+
+  function renderDocs() {
+    const sums = {};
+    for (const g of data.receipts) if (/^(true|yes|y|1|signed)$/i.test(String(g.signed ?? "").trim())) {
+      const k = poKey(g.po, g.sku); sums[k] = (sums[k] || 0) + Number(g.qty);
+    }
+    const poMap = {}; for (const p of data.purchase_orders) poMap[poKey(p.po, p.sku)] = p;
+    const manyPo = new Set([...data.purchase_orders, ...data.receipts, ...data.invoices].map(r => String(r.po ?? "").trim())).size > 1;
+    const hasNotes = data.invoices.some(r => String(r.notes ?? "").trim() !== "");
+    const poCol = f => manyPo ? [{t: "PO", get: r => r.po}] : [];
+    $("poPanel").replaceChildren(table([
+      ...poCol(), {t: "Item", get: r => h("span", {title: r.description || ""}, r.sku), cls: "sku"},
+      {t: "Unit", get: r => r.uom || ""}, {t: "Qty", n: 1, cls: "qty", f: "qty", get: r => r.qty}, {t: "Unit price", n: 1, cls: "price", f: "price", get: r => r.unit_price}
+    ], data.purchase_orders.map(r => ({row: r, attrs: {"data-po": poKey(r.po, r.sku)}}))));
+    $("grnPanel").replaceChildren(table([
+      {t: "Receipt", get: r => r.grn}, ...poCol(), {t: "Item", get: r => r.sku},
+      {t: "Signed qty", n: 1, cls: "qty", f: "qty", get: r => r.qty}, {t: "Signed", get: r => /^(true|yes|y|1|signed)$/i.test(String(r.signed ?? "").trim()) ? "yes" : "no"}
+    ], data.receipts.map(r => ({row: r, attrs: {"data-grn": String(r.grn || "").trim(), "data-po": poKey(r.po, r.sku)}}))));
+    $("invPanel").replaceChildren(table([
+      {t: "Invoice", get: r => r.invoice_no}, {t: "Line", get: r => r.line}, ...poCol(),
+      {t: "Item", get: r => r.sku}, {t: "Qty", n: 1, cls: "qty", f: "qty", get: r => r.qty}, {t: "Unit price", n: 1, cls: "price", f: "price", get: r => r.unit_price},
+      ...(hasNotes ? [{t: "Notes (not used)", cls: "notes", get: r => r.notes || ""}] : [])
+    ], data.invoices.map(r => ({row: r, attrs: {"data-inv": String(r.doc_id || r.invoice_no || "").trim(), "data-po": poKey(r.po, r.sku)}}))));
+    applyHighlight(sums, poMap);
+  }
+
+  function applyHighlight(sums, poMap) {
+    document.querySelectorAll(".m-ok,.m-diff").forEach(el => el.classList.remove("m-ok", "m-diff"));
+    if (!highlight) return;
+    for (const tr of $("invPanel").querySelectorAll("tbody tr")) {
+      const k = tr.dataset.po, po = poMap[k];
+      if (!po) continue;
+      const q = tr.querySelector('[data-f="qty"]'), p = tr.querySelector('[data-f="price"]');
+      const poRow = $("poPanel").querySelector('tr[data-po="' + CSS.escape(k) + '"]');
+      if (Number(p.textContent) === Number(po.unit_price)) {
+        p.classList.add("m-ok"); poRow.querySelector('[data-f="price"]').classList.add("m-ok");
+      }
+      if (Number(q.textContent) !== (sums[k] || 0)) {
+        q.classList.add("m-diff");
+        $("grnPanel").querySelectorAll('tr[data-po="' + CSS.escape(k) + '"] [data-f="qty"]').forEach(c => c.classList.add("m-diff"));
+      }
+    }
+  }
+  function refresh() { renderDocs(); }
+
+  function setData(d, id, lab) {
+    data = d; scenId = id; result = null; highlight = false; label = lab;
+    $("btnHi").setAttribute("aria-pressed", "false"); $("btnCsv").disabled = true;
+    $("result").hidden = true; $("gridmsg").hidden = false;
+    $("gridmsg").textContent = "Nothing is evaluated until Run check.";
+    $("telText").textContent = "hash join on (PO, SKU) with a cumulative receipt ledger. Not run yet.";
+    const b = $("datalabel");
+    b.textContent = lab === "sample" ? "Synthetic data sample" : lab === "stress" ? "Synthetic stress batch (1,000 lines)" : "Your data, kept in this browser";
+    b.className = "badge" + (lab === "mine" ? " mine" : "");
+    document.querySelectorAll("#scenarios button").forEach(btn => btn.setAttribute("aria-pressed", String(btn.dataset.id === id)));
+    renderDocs();
+  }
+
+  function flash(sel, root) {
+    const els = (root || document).querySelectorAll(sel);
+    els.forEach(el => { el.classList.add("flash"); setTimeout(() => el.classList.remove("flash"), 2200); });
+    if (els[0]) { const box = els[0].closest(".scroll"); box.scrollTop = Math.max(0, els[0].offsetTop - box.clientHeight / 2); }
+  }
+  const q = s => CSS.escape(s);
+
+  function run() {
+    result = E.evaluate(data);
+    const lines = result.lines, ex = lines.filter(l => l.status !== E.CLEAR), s = result.summary, c = s.counts;
+    let head;
+    if (!ex.length) head = "No exceptions found in " + lines.length + " invoice lines. A person still approves payment.";
+    else if (ex.length === 1 && ex[0].reason_codes === "QTY_BEYOND_SIGNED_RECEIPT")
+      head = ex[0].qty_beyond_review + " " + (ex[0].uom || "units") + " beyond signed receipt; QAR " + money(s.indicative_review_value_qar) + " indicative review value";
+    else head = ex.length + " of " + lines.length + " lines need review (" + c.HOLD + " HOLD, " + c.NEEDS_HUMAN + " NEEDS_HUMAN); QAR " + money(s.indicative_review_value_qar) + " indicative review value";
+    $("headline").textContent = head;
+    $("counts").replaceChildren(...E.STATUSES.map(st => h("span", {class: "chip " + st}, st + ": " + c[st])));
+    const rows = ex.map(r => ({row: r, attrs: {}}));
+    const exTable = table([
+      {t: "Status", get: r => h("span", {class: "chip " + r.status}, r.status)},
+      {t: "Invoice", get: r => h("a", {class: "ref", tabindex: "0", role: "link", onclick: () => flash('tr[data-inv="' + q(r.invoice_doc) + '"]', $("invPanel")), onkeydown: ev => { if (ev.key === "Enter") ev.target.click(); }}, r.invoice_no || r.invoice_doc)},
+      {t: "Line", get: r => r.line}, {t: "Item", get: r => r.sku},
+      {t: "Billed", n: 1, get: r => r.billed_qty}, {t: "Signed (all receipts)", n: 1, get: r => r.signed_qty_total},
+      {t: "Why", get: r => reasonText(r.reason_codes)},
+      {t: "Indicative review value (QAR)", n: 1, get: r => r.indicative_review_value_qar},
+      {t: "Source records", get: r => [
+        r.po_ref ? h("a", {class: "ref", tabindex: "0", role: "link", onclick: () => flash('tr[data-po="' + q(r.po + "|" + r.sku) + '"]', $("poPanel")), onkeydown: ev => { if (ev.key === "Enter") ev.target.click(); }}, r.po_ref) : null,
+        ...r.grn_refs.split(";").filter(Boolean).map(g => h("a", {class: "ref", tabindex: "0", role: "link", onclick: () => flash('tr[data-grn="' + q(g) + '"]', $("grnPanel")), onkeydown: ev => { if (ev.key === "Enter") ev.target.click(); }}, g))]}
+    ], rows);
+    $("exPanel").replaceChildren(exTable);
+    $("nextstepText").textContent = ex.length
+      ? "Accounts checks for another signed receipt, or asks the supplier, before deciding anything. This tool does not approve or release payment."
+      : "Nothing was flagged. A person still approves payment.";
+    $("result").hidden = false; $("gridmsg").hidden = true; $("btnCsv").disabled = !ex.length;
+    const t = result.telemetry;
+    $("telText").replaceChildren(
+      "hash join on (PO, item) with a cumulative receipt ledger. ",
+      "Rows: ", h("code", {}, t.po_rows + " PO / " + t.receipt_rows + " receipts / " + t.invoice_rows + " invoice"), ". ",
+      "Hash operations: ", h("code", {}, String(t.hash_ops)), " (a nested-loop match would make ", h("code", {}, String(t.naive_comparisons)), " comparisons). ",
+      "Measured time in this browser: ", h("code", {}, t.elapsed_ms + " ms"), ". ",
+      "Receipt gate (more than " + t.k_cap + " receipts on one item goes to a person): most on any item = ", h("code", {}, String(t.max_open_receipts_per_line)), ".");
+  }
+
+  function download() {
+    if (!result) return;
+    const url = URL.createObjectURL(new Blob([E.exceptionsCsv(result, false)], {type: "text/csv;charset=utf-8"}));
+    const a = h("a", {href: url, download: "matchcheck_exceptions.csv"});
+    document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
+  }
+
+  function loadMine() {
+    const err = $("loadErr"); err.textContent = "";
+    Promise.all(["fPo", "fGrn", "fInv"].map(id => $(id).files[0] ? $(id).files[0].text() : Promise.resolve(null))).then(([a, b, c]) => {
+      let d;
+      if (a !== null || b !== null || c !== null) {
+        d = {purchase_orders: a ? E.parseCsv(a) : [], receipts: b ? E.parseCsv(b) : [], invoices: c ? E.parseCsv(c) : []};
+      } else {
+        try { d = JSON.parse($("jsonIn").value); } catch (e) { err.textContent = "That is not valid JSON: " + e.message; return; }
+      }
+      if (!d || typeof d !== "object" || !["purchase_orders", "receipts", "invoices"].every(k => Array.isArray(d[k] || []))) {
+        err.textContent = "Expected lists named purchase_orders, receipts and invoices."; return;
+      }
+      if (!(d.invoices || []).length) { err.textContent = "No invoice rows found."; return; }
+      d = {purchase_orders: d.purchase_orders || [], receipts: d.receipts || [], invoices: d.invoices};
+      $("dlg").close(); setData(d, null, "mine");
+    });
+  }
+
+  $("scenarios").replaceChildren(...SCEN.map(s => h("button", {type: "button", "data-id": s.id, "aria-pressed": "false",
+    onclick: () => setData(JSON.parse(JSON.stringify(s.data)), s.id, "sample")}, h("b", {}, s.title), h("span", {}, s.blurb))));
+  $("btnRun").addEventListener("click", run);
+  $("btnCsv").addEventListener("click", download);
+  $("btnHi").addEventListener("click", () => { highlight = !highlight; $("btnHi").setAttribute("aria-pressed", String(highlight)); refresh();
+    if (!result) $("gridmsg").textContent = highlight ? "Matched fields are highlighted for reading only. Nothing is evaluated until Run check." : "Nothing is evaluated until Run check."; });
+  $("btnStress").addEventListener("click", () => { setData(E.synth(1000, 1), null, "stress"); run(); });
+  $("btnData").addEventListener("click", () => { $("loadErr").textContent = ""; $("dlg").showModal(); });
+  $("btnLoad").addEventListener("click", loadMine);
+  setData(JSON.parse(JSON.stringify(SCEN[0].data)), SCEN[0].id, "sample");
+  window.__matchcheck = {setData, run, get result() { return result; }};
+})();
+</script>
+</body>
+</html>

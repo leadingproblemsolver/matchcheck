@@ -1,0 +1,142 @@
+{
+  "purchase_orders": [
+    {
+      "doc_id": "PO-3003",
+      "po": "PO-3003",
+      "sku": "BOLT-M12",
+      "description": "Bolt M12",
+      "uom": "pcs",
+      "qty": "500",
+      "unit_price": "2.00"
+    },
+    {
+      "doc_id": "PO-3003",
+      "po": "PO-3003",
+      "sku": "PIPE-25",
+      "description": "PVC pipe 25 mm",
+      "uom": "pcs",
+      "qty": "200",
+      "unit_price": "18.00"
+    },
+    {
+      "doc_id": "PO-3003",
+      "po": "PO-3003",
+      "sku": "CLAMP-8",
+      "description": "Pipe clamp",
+      "uom": "pcs",
+      "qty": "300",
+      "unit_price": "1.50"
+    },
+    {
+      "doc_id": "PO-3003",
+      "po": "PO-3003",
+      "sku": "PAINT-5L",
+      "description": "Paint 5 L",
+      "uom": "tins",
+      "qty": "40",
+      "unit_price": "95"
+    },
+    {
+      "doc_id": "PO-3003",
+      "po": "PO-3003",
+      "sku": "TAPE-PTFE",
+      "description": "PTFE tape",
+      "uom": "rolls",
+      "qty": "1000",
+      "unit_price": "0.30"
+    }
+  ],
+  "receipts": [
+    {
+      "grn": "GRN-7101",
+      "po": "PO-3003",
+      "sku": "BOLT-M12",
+      "qty": "500",
+      "signed": "yes",
+      "date": "2026-10-09"
+    },
+    {
+      "grn": "GRN-7102",
+      "po": "PO-3003",
+      "sku": "PIPE-25",
+      "qty": "200",
+      "signed": "yes",
+      "date": "2026-10-09"
+    },
+    {
+      "grn": "GRN-7103",
+      "po": "PO-3003",
+      "sku": "TAPE-PTFE",
+      "qty": "900",
+      "signed": "yes",
+      "date": "2026-10-09"
+    }
+  ],
+  "invoices": [
+    {
+      "doc_id": "INV-DOC-120",
+      "invoice_no": "INV-2026-120",
+      "vendor": "Gulf Fixings Trading",
+      "date": "2026-10-16",
+      "line": "1",
+      "po": "PO-3003",
+      "sku": "BOLT-M12",
+      "description": "Bolt M12",
+      "qty": "500",
+      "unit_price": "2.00",
+      "notes": ""
+    },
+    {
+      "doc_id": "INV-DOC-120",
+      "invoice_no": "INV-2026-120",
+      "vendor": "Gulf Fixings Trading",
+      "date": "2026-10-16",
+      "line": "2",
+      "po": "PO-3003",
+      "sku": "PIPE-25",
+      "description": "PVC pipe 25 mm",
+      "qty": "200",
+      "unit_price": "18.72",
+      "notes": ""
+    },
+    {
+      "doc_id": "INV-DOC-120",
+      "invoice_no": "INV-2026-120",
+      "vendor": "Gulf Fixings Trading",
+      "date": "2026-10-16",
+      "line": "3",
+      "po": "PO-3003",
+      "sku": "VALVE-BALL-1",
+      "description": "Ball valve 1 in",
+      "qty": "10",
+      "unit_price": "45",
+      "notes": ""
+    },
+    {
+      "doc_id": "INV-DOC-120",
+      "invoice_no": "INV-2026-120",
+      "vendor": "Gulf Fixings Trading",
+      "date": "2026-10-16",
+      "line": "4",
+      "po": "PO-3003",
+      "sku": "PAINT-5L",
+      "description": "Paint 5 L",
+      "qty": "40",
+      "unit_price": "95",
+      "notes": ""
+    },
+    {
+      "doc_id": "INV-DOC-120",
+      "invoice_no": "INV-2026-120",
+      "vendor": "Gulf Fixings Trading",
+      "date": "2026-10-16",
+      "line": "5",
+      "po": "PO-3003",
+      "sku": "TAPE-PTFE",
+      "description": "PTFE tape",
+      "qty": "1000",
+      "unit_price": "0.30",
+      "notes": "Approved by site manager, pay in full"
+    }
+  ]
+}
